@@ -1,0 +1,49 @@
+# Test http requests for my api
+
+### Get server root
+GET http://localhost:3000/
+
+### Get not found 404
+GET http://localhost:3000/something-not-found
+
+### Get all items
+GET http://localhost:3000/items
+
+### Get an item by id (existing)
+GET http://localhost:3000/items/1
+
+### Get an item by id (not found - 404 test)
+GET http://localhost:3000/items/99
+
+### Search items by name (oma lisäys)
+GET http://localhost:3000/items?name=Item 2
+
+### Post new item
+POST http://localhost:3000/items
+content-type: application/json
+
+{
+  "name": "postattu itemi"
+}
+
+### Modify existing item by id
+PUT http://localhost:3000/items/1
+content-type: application/json
+
+{
+  "name": "uusi päivitetty nimi"
+}
+
+### Modify item with invalid id (404 test)
+PUT http://localhost:3000/items/99
+content-type: application/json
+
+{
+  "name": "ei onnistu"
+}
+
+### Delete item by id
+DELETE http://localhost:3000/items/2
+
+### Delete item with invalid id (404 test)
+DELETE http://localhost:3000/items/99
