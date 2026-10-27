@@ -15,8 +15,8 @@ GET http://localhost:3000/items/1
 ### Get an item by id (not found - 404 test)
 GET http://localhost:3000/items/99
 
-### Search items by name (oma lisäys)
-GET http://localhost:3000/items?name=Item 2
+### Get a random Chuck Norris joke
+GET http://localhost:3000/joke
 
 ### Post new item
 POST http://localhost:3000/items

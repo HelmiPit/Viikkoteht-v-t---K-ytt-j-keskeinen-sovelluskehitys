@@ -64,7 +64,7 @@ Response:
 
 ![Get an item by id (not found - 404 test)](screenshots/image_5.png)
 
-## 6. Search items by name (oma lisäys)
+## 6. Get a random Chuck Norris joke (OMA LISÄYS)
 
 HTTP request:
 
