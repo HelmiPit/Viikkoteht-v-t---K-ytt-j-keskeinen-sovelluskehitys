@@ -10,7 +10,7 @@ Sain tehtyä kaikki osiot 1-6.
 
 Ei tullut varsinaisia ongelmia, mutta lisäsin jonkin verran virheenkäsittelyä (esim. virheellisen JSON-datan käsittely `try-catch`-lohkossa sekä 404-virheet JSON-muodossa) ja muutin koodia siistimmäksi.
 
-Lisäsin yhden oman ominaisuuden (Search items by name), jonka tarkoitus on suodattaa ja hakea itemit nimen perusteella käyttäen hakusanaa (GET /items?name=Item 1).
+Lisäsin yhden oman ominaisuuden (Search items by name), jonka tarkoitus on suodattaa ja hakea itemit nimen perusteella käyttäen hakusanaa (esim. GET /items?name=Item 2).
 
 ## Kuvakaappaukset sovelluksen toiminnasta
 
