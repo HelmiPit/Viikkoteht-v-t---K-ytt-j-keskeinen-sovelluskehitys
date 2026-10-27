@@ -1,6 +1,6 @@
 # Tehtävä 1 - Getting started with node.js
 
-**GitHub Repositorio (node-start):** https://github.com/HelmiPit/Viikkoteht-v-t---K-ytt-j-keskeinen-sovelluskehitys/tree/node-start
+Tämän sovelluksen tarkoitus on rakentaa yksinkertainen REST API hyödyntäen JavaScriptiä ja Node.js-alustaa ilman Express-frameworkin apua. Sovelluksen avulla harjoitellaan HTTP-standardien mukaisten pyyntöjen (GET, POST, PUT, DELETE) ja vastausten käsittelyä, virhekoodien palauttaamista sekä nodemon kehitystyökalun käyttöä. Sovellusta testataan REST CLIENT-laajennuksen avulla.
 
 ## Mitkä osiot sait tehtyä
 
