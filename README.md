@@ -1,6 +1,6 @@
 # Tehtävä 2 - Getting started with Express framework
 
-**GitHub Repositorio (express):** https://github.com/HelmiPit/Viikkoteht-v-t---K-ytt-j-keskeinen-sovelluskehitys/tree/express
+Tämän sovelluksen tarkoitus on rakentaa REST API hyödyntäen Express-frameworkia ja Node.js-alustaa. Sovelluksen avulla harjoitellaan Express-reititystä, CRUD-operaatioita (`/api/media` ja `/api/users`), stattisten kuvien tarjoilua sekä HTML-sivun dynaamista renderöintiä Pug-sivupohjamoottorilla. Sovelluksen toiminta ja HTTP-statuskoodit on testattu VS Coden REST Client -laajennuksella.
 
 ## Mitkä osiot sait tehtyä
 
