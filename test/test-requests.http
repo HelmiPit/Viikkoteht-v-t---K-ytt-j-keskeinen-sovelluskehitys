@@ -1,49 +1,114 @@
-# Test http requests for my api
+# Test http requests for Express API
+@apiUrl = http://localhost:3000/api
 
-### Get server root
+### GET Pug HTML landing page
 GET http://localhost:3000/
 
-### Get not found 404
-GET http://localhost:3000/something-not-found
+### GET 404 non-existing route
+GET http://localhost:3000/api/nonexistent
 
-### Get all items
-GET http://localhost:3000/items
+### GET static image file from media static middleware
+GET http://localhost:3000/media/ffd8.jpg
 
-### Get an item by id (existing)
-GET http://localhost:3000/items/1
+## /api/media ENDPOINTS
 
-### Get an item by id (not found - 404 test)
-GET http://localhost:3000/items/99
+### GET all media items
+GET {{apiUrl}}/media
 
-### Search items by name (oma lisäys)
-GET http://localhost:3000/items?name=Item 2
+### GET media items with limit parameter
+GET {{apiUrl}}/media?limit=2
 
-### Post new item
-POST http://localhost:3000/items
-content-type: application/json
+### GET media item by valid ID
+GET {{apiUrl}}/media/9626
 
-{
-  "name": "postattu itemi"
-}
+### GET media item by non-existing ID (404)
+GET {{apiUrl}}/media/99999
 
-### Modify existing item by id
-PUT http://localhost:3000/items/1
-content-type: application/json
+### POST Add new media item (201 Created)
+POST {{apiUrl}}/media
+Content-Type: application/json
 
 {
-  "name": "uusi päivitetty nimi"
+  "filename": "60ac.jpg",
+  "title": "New Mountain View",
+  "description": "Landscape shot taken during sunrise",
+  "user_id": 305,
+  "media_type": "image/jpeg"
 }
 
-### Modify item with invalid id (404 test)
-PUT http://localhost:3000/items/99
-content-type: application/json
+### POST Add new media item missing title (400 Bad Request)
+POST {{apiUrl}}/media
+Content-Type: application/json
 
 {
-  "name": "ei onnistu"
+  "filename": "60ac.jpg",
+  "description": "Missing title test"
 }
 
-### Delete item by id
-DELETE http://localhost:3000/items/2
+### PUT Modify existing media item (200 OK)
+PUT {{apiUrl}}/media/9632
+Content-Type: application/json
 
-### Delete item with invalid id (404 test)
-DELETE http://localhost:3000/items/99
+{
+  "title": "Updated Drinks Collection",
+  "description": "Fresh summer cocktails"
+}
+
+### PUT Modify non-existing media item (404 Not Found)
+PUT {{apiUrl}}/media/99999
+Content-Type: application/json
+
+{
+  "title": "Does not exist"
+}
+
+### DELETE media item (200 OK)
+DELETE {{apiUrl}}/media/9625
+
+### DELETE non-existing media item (404 Not Found)
+DELETE {{apiUrl}}/media/99999
+
+## /api/users ENDPOINTS
+
+### GET all users
+GET {{apiUrl}}/users
+
+### GET user by valid ID
+GET {{apiUrl}}/users/260
+
+### GET user by non-existing ID (404)
+GET {{apiUrl}}/users/99999
+
+### POST Create new user (201 Created)
+POST {{apiUrl}}/users
+Content-Type: application/json
+
+{
+  "username": "coder_jane",
+  "email": "jane@example.com",
+  "password": "supersecretpassword",
+  "user_level_id": 1
+}
+
+### POST Create new user missing fields (400 Bad Request)
+POST {{apiUrl}}/users
+Content-Type: application/json
+
+{
+  "username": "incomplete_user"
+}
+
+### PUT Update existing user details (200 OK)
+PUT {{apiUrl}}/users/305
+Content-Type: application/json
+
+{
+  "username": "Donatello_Updated",
+  "email": "donatello.new@example.com"
+}
+
+### DELETE user (200 OK)
+DELETE {{apiUrl}}/users/3609
+
+### DELETE non-existing user (404 Not Found)
+DELETE {{apiUrl}}/users/99999

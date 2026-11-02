@@ -1,125 +1,221 @@
-# Tehtävä 1 - Getting started with node.js
+# Tehtävä 2 - Getting started with Express framework
 
-**GitHub Repositorio (node-start):** https://github.com/HelmiPit/Viikkoteht-v-t---K-ytt-j-keskeinen-sovelluskehitys/tree/node-start
+**GitHub Repositorio (express):** https://github.com/HelmiPit/Viikkoteht-v-t---K-ytt-j-keskeinen-sovelluskehitys/tree/express
 
 ## Mitkä osiot sait tehtyä
 
-Sain tehtyä kaikki osiot 1-6.
+Sain tehtyä kaikki osiot 1-5 + 6 (jsDoc comments).
 
 ## Mahdolliset ongelmat
 
-Ei tullut varsinaisia ongelmia, mutta lisäsin jonkin verran virheenkäsittelyä (esim. virheellisen JSON-datan käsittely `try-catch`-lohkossa sekä 404-virheet JSON-muodossa) ja muutin koodia siistimmäksi.
-
-Lisäsin yhden oman ominaisuuden (Search items by name), jonka tarkoitus on suodattaa ja hakea itemit nimen perusteella käyttäen hakusanaa (esim. GET /items?name=Item 2).
+Puuttuvat express- ja pug-riippuvuudet aiheuttivat alunperin sovelluksen kaatumisen. Lisäksi ESLint antoi varoituksen käyttämättömästä muuttujasta. Ratkaisin ongelmat asentamalla puuttuvat npm-paketit ja muuttamalla käyttäjätietojen käsittelyä (salasana poistetaan delete-operaattorilla destrukturointimuuttujan sijaan).
 
 ## Kuvakaappaukset sovelluksen toiminnasta
 
-## 1. Get server root
+### GET Pug HTML landing page
+
+![Pug Landing Page](screenshots/media_api_landing_page.png)
+
+### GET static image file from media static middleware
+
+![2f9b.jpg](screenshots/2f9b_proof.png)
+
+![60ac.jpg](screenshots/60ac_proof.png)
+
+![dbbd.jpg](screenshots/dbbd_proof.png)
+
+![f504.jpg](screenshots/f504_proof.png)
+
+![ffd8.jpg](screenshots/ffd8_proof.png)
+
+### GET 404 non-existing route
 
 HTTP request:
 
-![Get server root](screenshots/image_1.2.png)
+![GET 404 non-existing route](screenshots/image_nonexistent.png)
 
 Response:
 
-![Get server root](screenshots/image_1.png)
+![GET 404 non-existing route](screenshots/image_nonexistent2.png)
 
-## 2. Get not found 404
+## /api/media ENDPOINTS
+
+### GET all media items
 
 HTTP request:
 
-![Get not found 404](screenshots/image_2.2.png)
+![GET all media items](screenshots/image_1.png)
 
 Response:
 
-![Get not found 404](screenshots/image_2.png)
+![GET all media items](screenshots/image_1.2.png)
 
-## 3. Get all items
+### GET media items with limit parameter
 
 HTTP request:
 
-![Get all items](screenshots/image_3.2.png)
+![GET media items with limit parameter](screenshots/image_2.png)
 
 Response:
 
-![Get all items](screenshots/image_3.png)
+![GET media items with limit parameter](screenshots/image_2.2.png)
 
-## 4. Get an item by id (existing)
+### GET media item by valid ID
 
 HTTP request:
 
-![Get an item by id](screenshots/image_4.2.png)
+![GET media item by valid ID](screenshots/image_3.png)
 
 Response:
 
-![Get an item by id](screenshots/image_4.png)
+![GET media item by valid ID](screenshots/image_3.2.png)
 
-## 5. Get an item by id (not found - 404 test)
+### GET media item by non-existing ID (404)
 
 HTTP request:
 
-![Get an item by id (not found - 404 test)](screenshots/image_5.2.png)
+![GET media item by non-existing ID (404)](screenshots/image_4.png)
 
 Response:
 
-![Get an item by id (not found - 404 test)](screenshots/image_5.png)
+![GET media item by non-existing ID (404)](screenshots/image_4.2.png)
 
-## 6. Search items by name (oma lisäys)
+### POST Add new media item (201 Created)
 
 HTTP request:
 
-![Search items by name](screenshots/image_6.2.png)
+![POST Add new media item (201 Created)](screenshots/image_5.png)
 
 Response:
 
-![Search items by name](screenshots/image_6.png)
+![POST Add new media item (201 Created)](screenshots/image_5.2.png)
 
-## 7. Post new item
+### POST Add new media item missing title (400 Bad Request)
 
 HTTP request:
 
-![Post new item](screenshots/image_7.2.png)
+![POST Add new media item missing title (400 Bad Request)](screenshots/image_6.png)
 
 Response:
 
-![Post new item](screenshots/image_7.png)
+![POST Add new media item missing title (400 Bad Request)](screenshots/image_6.2.png)
 
-## 8. Modify existing item by id
+### PUT Modify existing media item (200 OK)
 
 HTTP request:
 
-![Modify existing item by id](screenshots/image_8.2.png)
+![PUT Modify existing media item (200 OK)](screenshots/image_7.png)
 
 Response:
 
-![Modify existing item by id](screenshots/image_8.png)
+![PUT Modify existing media item (200 OK)](screenshots/image_7.2.png)
 
-## 9. Modify item with invalid id (404 test)
+### PUT Modify non-existing media item (404 Not Found)
 
 HTTP request:
 
-![Modify item with invalid id (404 test)](screenshots/image_9.2.png)
+![PUT Modify non-existing media item (404 Not Found)](screenshots/image_8.png)
 
 Response:
 
-![Modify item with invalid id (404 test)](screenshots/image_9.png)
+![PUT Modify non-existing media item (404 Not Found)](screenshots/image_8.2.png)
 
-## 10. Delete item by id
+### DELETE media item (200 OK)
 
 HTTP request:
 
-![Delete item by id](screenshots/image_10.2.png)
+![DELETE media item (200 OK)](screenshots/image_9.png)
 
 Response:
 
-![Delete item by id](screenshots/image_10.png)
+![DELETE media item (200 OK)](screenshots/image_9.2.png)
 
-## 11. Delete item with invalid id (404 test)
+### DELETE non-existing media item (404 Not Found)
 
 HTTP request:
 
-![Delete item with invalid id (404 test)](screenshots/image_11.2.png)
+![DELETE non-existing media item (404 Not Found)](screenshots/image_10.png)
 
 Response:
 
-![Delete item with invalid id (404 test)](screenshots/image_11.png)
+![DELETE non-existing media item (404 Not Found)](screenshots/image_10.2.png)
+
+## /api/users ENDPOINTS
+
+### GET all users
+
+HTTP request:
+
+![GET all users](screenshots/image_11.png)
+
+Response:
+
+![GET all users](screenshots/image_11.2.png)
+
+### GET user by valid ID
+
+![GET user by valid ID](screenshots/image_12.png)
+
+Response:
+
+![GET user by valid ID](screenshots/image_12.2.png)
+
+### GET user by non-existing ID (404)
+
+HTTP request:
+
+![GET user by non-existing ID (404)](screenshots/image_13.png)
+
+Response:
+
+![GET user by non-existing ID (404)](screenshots/image_13.2.png)
+
+### POST Create new user (201 Created)
+
+HTTP request:
+
+![POST Create new user (201 Created)](screenshots/image_14.png)
+
+Response:
+
+![POST Create new user (201 Created)](screenshots/image_14.2.png)
+
+### POST Create new user missing fields (400 Bad Request)
+
+HTTP request:
+
+![POST Create new user missing fields (400 Bad Request)](screenshots/image_15.png)
+
+Response:
+
+![POST Create new user missing fields (400 Bad Request)](screenshots/image_15.2.png)
+
+### PUT Update existing user details (200 OK)
+
+HTTP request:
+
+![PUT Update existing user details (200 OK)](screenshots/image_16.png)
+
+Response:
+
+![PUT Update existing user details (200 OK)](screenshots/image_16.2.png)
+
+### DELETE user (200 OK)
+
+HTTP request:
+
+![DELETE user (200 OK)](screenshots/image_17.png)
+
+Response:
+
+![DELETE user (200 OK)](screenshots/image_17.2.png)
+
+### DELETE non-existing user (404 Not Found)
+
+HTTP request:
+
+![DELETE non-existing user (404 Not Found)](screenshots/image_18.png)
+
+Response:
+
+![DELETE non-existing user (404 Not Found)](screenshots/image_18.2.png)

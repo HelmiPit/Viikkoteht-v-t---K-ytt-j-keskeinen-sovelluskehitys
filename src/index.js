@@ -1,127 +1,179 @@
-import http from 'http';
+/**
+ * Entry point for Express REST API Server
+ * @module index
+ */
+
+import express from 'express';
+import {
+  addMediaItem,
+  deleteMediaItem,
+  getAllMediaItems,
+  getMediaItemById,
+  modifyMediaItem,
+} from './media.js';
+import {
+  addUser,
+  deleteUser,
+  getAllUsers,
+  getUserById,
+  modifyUser,
+} from './users.js';
+
 const hostname = '127.0.0.1';
+const app = express();
 const port = 3000;
 
-// dummy mock data
-let items = [
-  {id: 1, name: 'Item 1'},
-  {id: 2, name: 'Item 2'},
-  {id: 6, name: 'Item 6'},
-  {id: 8, name: 'Item 8'},
-];
+// Set Pug as the template engine
+app.set('view engine', 'pug');
+app.set('views', 'src/views');
 
-// JSON 404 response handler
-const notFound = (response, message = 'Resource Not Found') => {
-  response.writeHead(404, {'Content-Type': 'application/json'});
-  response.end(JSON.stringify({error: message}));
-};
+// Parse incoming request body as JSON
+app.use(express.json());
 
-const server = http.createServer((req, res) => {
-  console.log('Request', req.method, req.url);
-  // parse url and query params
-  const parsedUrl = new URL(req.url, `http://${hostname}:${port}`);
-  const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
-  const resource = pathParts[0];
-  const id = pathParts[1];
+// Serve static assets from public folder (e.g. index.html, script.js)
+app.use('/', express.static('public'));
 
-  // GET root
-  if (req.url === '/') {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end('<p>Tervetuloa esimerkkirajapintaan</p>');
+// Requirement 5: Serve static media files from public/uploads or public/media folder
+app.use('/media', express.static('public/media'));
 
-  // GET /items OR GET /items/:id OR GET /items?name=searchTerm (Point 5 functionality)
-  } else if (req.method === 'GET' && resource === 'items') {
-    const nameQuery = parsedUrl.searchParams.get('name');
+/**
+ * Route GET / -> Render Pug HTML page (Requirement 1 & 3)
+ */
+app.get('/', (req, res) => {
+  res.render('index', {
+    title: 'Media API Portal',
+    message: 'Explore and interact with available REST endpoints.',
+  });
+});
 
-    if (id) {
-      const item = items.find((item) => id == item.id);
-      if (!item) {
-        notFound(res, 'Item not found');
-        return;
-      }
-      res.writeHead(200, {'Content-Type': 'application/json'});
-      res.write(JSON.stringify(item));
-    } else if (nameQuery) {
-      // Search items by name
-      const filteredItems = items.filter((item) =>
-        item.name.toLowerCase().includes(nameQuery.toLowerCase())
-      );
-      res.writeHead(200, {'Content-Type': 'application/json'});
-      res.write(JSON.stringify(filteredItems));
-    } else {
-      res.writeHead(200, {'Content-Type': 'application/json'});
-      res.write(JSON.stringify(items));
-    }
-    res.end();
+/**
+ *  MEDIA ENDPOINTS (/api/media)
+ */
 
-  // POST /items
-  } else if (req.method === 'POST' && resource === 'items') {
-    let data = '';
-    req.on('data', (chunk) => {
-      data += chunk.toString();
-    });
-    req.on('end', () => {
-      console.log('POST data:', data);
-      try {
-        const newItem = JSON.parse(data);
-        newItem.id = items.length > 0 ? items[items.length - 1].id + 1 : 1;
-        items.push(newItem);
-        res.writeHead(201, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({message: 'Item created', item: newItem}));
-      } catch {
-        res.writeHead(400, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({error: 'Invalid JSON data'}));
-      }
-    });
+/**
+ * GET /api/media - Retrieve all media items with optional limit query
+ */
+app.get('/api/media', (req, res) => {
+  const items = getAllMediaItems(req.query.limit);
+  res.status(200).json(items);
+});
 
-  // PUT /items/:id
-  } else if (req.method === 'PUT' && resource === 'items') {
-    if (!id) {
-      notFound(res, 'ID is required for update');
-      return;
-    }
-    let data = '';
-    req.on('data', (chunk) => {
-      data += chunk.toString();
-    });
-    req.on('end', () => {
-      try {
-        const itemIndex = items.findIndex((item) => id == item.id);
-        if (itemIndex === -1) {
-          notFound(res, 'Item not found to update');
-          return;
-        }
-        const updatedData = JSON.parse(data);
-        items[itemIndex] = { ...items[itemIndex], ...updatedData, id: Number(id) };
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({message: 'Item updated', item: items[itemIndex]}));
-      } catch {
-        res.writeHead(400, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({error: 'Invalid JSON data'}));
-      }
-    });
-
-  // DELETE /items/:id
-  } else if (req.method === 'DELETE' && resource === 'items') {
-    if (!id) {
-      notFound(res, 'ID is required for deletion');
-      return;
-    }
-    const itemIndex = items.findIndex((item) => id == item.id);
-    if (itemIndex === -1) {
-      notFound(res, 'Item not found to delete');
-      return;
-    }
-    const deletedItem = items.splice(itemIndex, 1);
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({message: 'Item deleted', item: deletedItem[0]}));
-
-  // Default 404 error response
+/**
+ * GET /api/media/:id - Retrieve media item by ID
+ */
+app.get('/api/media/:id', (req, res) => {
+  const mediaItem = getMediaItemById(req.params.id);
+  if (mediaItem) {
+    res.status(200).json(mediaItem);
   } else {
-    notFound(res);
+    res.status(404).json({ error: 404, message: 'Media item not found' });
   }
 });
 
-server.listen(port, hostname, () => {
+/**
+ * POST /api/media - Add new media item
+ */
+app.post('/api/media', (req, res) => {
+  const { title, filename, user_id } = req.body;
+  if (!title || !filename || !user_id) {
+    return res
+      .status(400)
+      .json({ error: 400, message: 'Missing required fields: title, filename, or user_id' });
+  }
+  const newItem = addMediaItem(req.body);
+  res.status(201).json({ message: 'New media item added.', item: newItem });
+});
+
+/**
+ * PUT /api/media/:id - Update existing media item
+ */
+app.put('/api/media/:id', (req, res) => {
+  const updatedItem = modifyMediaItem(req.params.id, req.body);
+  if (!updatedItem) {
+    return res.status(404).json({ error: 404, message: 'Media item not found!' });
+  }
+  res.status(200).json({ message: 'Media updated!', updatedItem });
+});
+
+/**
+ * DELETE /api/media/:id - Delete media item by ID
+ */
+app.delete('/api/media/:id', (req, res) => {
+  const success = deleteMediaItem(req.params.id);
+  if (!success) {
+    return res.status(404).json({ error: 404, message: 'Media item not found!' });
+  }
+  res.status(200).json({ message: 'Media item deleted!' });
+});
+
+/**
+ *  USER ENDPOINTS (/api/users)
+ */
+
+/**
+ * GET /api/users - Retrieve all users
+ */
+app.get('/api/users', (req, res) => {
+  const allUsers = getAllUsers();
+  res.status(200).json(allUsers);
+});
+
+/**
+ * GET /api/users/:id - Retrieve user by ID
+ */
+app.get('/api/users/:id', (req, res) => {
+  const user = getUserById(req.params.id);
+  if (user) {
+    res.status(200).json(user);
+  } else {
+    res.status(404).json({ error: 404, message: 'User not found' });
+  }
+});
+
+/**
+ * POST /api/users - Create a new user
+ */
+app.post('/api/users', (req, res) => {
+  const { username, email } = req.body;
+  if (!username || !email) {
+    return res
+      .status(400)
+      .json({ error: 400, message: 'Missing required fields: username or email' });
+  }
+  const createdUser = addUser(req.body);
+  res.status(201).json({ message: 'User created successfully', user: createdUser });
+});
+
+/**
+ * PUT /api/users/:id - Modify existing user
+ */
+app.put('/api/users/:id', (req, res) => {
+  const updatedUser = modifyUser(req.params.id, req.body);
+  if (!updatedUser) {
+    return res.status(404).json({ error: 404, message: 'User not found!' });
+  }
+  res.status(200).json({ message: 'User updated!', user: updatedUser });
+});
+
+/**
+ * DELETE /api/users/:id - Delete user by ID
+ */
+app.delete('/api/users/:id', (req, res) => {
+  const success = deleteUser(req.params.id);
+  if (!success) {
+    return res.status(404).json({ error: 404, message: 'User not found!' });
+  }
+  res.status(200).json({ message: 'User deleted!' });
+});
+
+/**
+ * 404 FALLBACK ROUTE
+ */
+app.use((req, res) => {
+  res.status(404).json({ error: 404, message: 'Resource not found' });
+});
+
+// Start listening for HTTP connections
+app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
