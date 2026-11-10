@@ -37,7 +37,7 @@ app.use('/', express.static('public'));
 app.use('/media', express.static('public/media'));
 
 /**
- * Route GET / -> Render Pug HTML page (Requirement 1 & 3)
+ * Route GET / -> Render Pug HTML page
  */
 app.get('/', (req, res) => {
   res.render('index', {
