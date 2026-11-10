@@ -1,114 +1,89 @@
-# Test http requests for Express API
+# Test http requests for my api
 @apiUrl = http://localhost:3000/api
 
-### GET Pug HTML landing page
+
+### Get server root
 GET http://localhost:3000/
 
-### GET 404 non-existing route
-GET http://localhost:3000/api/nonexistent
+### Get api root
+GET http://localhost:3000/api
 
-### GET static image file from media static middleware
-GET http://localhost:3000/media/ffd8.jpg
+### Get not found 404
+GET http://localhost:3000/something-not-found
 
-## /api/media ENDPOINTS
+### Post server root
+POST http://localhost:3000/
+
+##################
+## /media requests
+##################
 
 ### GET all media items
 GET {{apiUrl}}/media
 
-### GET media items with limit parameter
+### GET 3 latest media items
 GET {{apiUrl}}/media?limit=2
 
-### GET media item by valid ID
+### GET media item by id
 GET {{apiUrl}}/media/9626
 
-### GET media item by non-existing ID (404)
-GET {{apiUrl}}/media/99999
+### GET media item by id (Not found)
+GET {{apiUrl}}/media/0
 
-### POST Add new media item (201 Created)
+### Add new media item (JSON, no file included!)
 POST {{apiUrl}}/media
-Content-Type: application/json
+content-type: application/json
 
 {
   "filename": "60ac.jpg",
-  "title": "New Mountain View",
-  "description": "Landscape shot taken during sunrise",
+  "title": "New image",
+  "description": "The description of the new image",
   "user_id": 305,
   "media_type": "image/jpeg"
 }
 
-### POST Add new media item missing title (400 Bad Request)
+### Add new media item WITH IMAGE (form-data)
 POST {{apiUrl}}/media
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+New cat image
+------Boundary
+Content-Disposition: form-data; name="user_id"
+
+21
+------Boundary
+Content-Disposition: form-data; name="file"; filename="image.png"
+Content-Type: image/jpeg
+
+< ./bunny.png
+------Boundary--
+
+### Add new media item (Bad request, title missing)
+POST {{apiUrl}}/media
+content-type: application/json
 
 {
   "filename": "60ac.jpg",
-  "description": "Missing title test"
+  "description": "The description of the new image",
+  "user_id": 305,
+  "media_type": "image/jpeg"
 }
 
-### PUT Modify existing media item (200 OK)
+### Modify existing media item 
 PUT {{apiUrl}}/media/9632
-Content-Type: application/json
+content-type: application/json
 
 {
-  "title": "Updated Drinks Collection",
-  "description": "Fresh summer cocktails"
+  "description": "updated desc",
+  "title": "Uus title"
 }
 
-### PUT Modify non-existing media item (404 Not Found)
-PUT {{apiUrl}}/media/99999
-Content-Type: application/json
-
-{
-  "title": "Does not exist"
-}
-
-### DELETE media item (200 OK)
+### Delete media item 
 DELETE {{apiUrl}}/media/9625
 
-### DELETE non-existing media item (404 Not Found)
-DELETE {{apiUrl}}/media/99999
+## /users requests
 
-## /api/users ENDPOINTS
-
-### GET all users
-GET {{apiUrl}}/users
-
-### GET user by valid ID
-GET {{apiUrl}}/users/260
-
-### GET user by non-existing ID (404)
-GET {{apiUrl}}/users/99999
-
-### POST Create new user (201 Created)
-POST {{apiUrl}}/users
-Content-Type: application/json
-
-{
-  "username": "coder_jane",
-  "email": "jane@example.com",
-  "password": "supersecretpassword",
-  "user_level_id": 1
-}
-
-### POST Create new user missing fields (400 Bad Request)
-POST {{apiUrl}}/users
-Content-Type: application/json
-
-{
-  "username": "incomplete_user"
-}
-
-### PUT Update existing user details (200 OK)
-PUT {{apiUrl}}/users/305
-Content-Type: application/json
-
-{
-  "username": "Donatello_Updated",
-  "email": "donatello.new@example.com"
-}
-
-### DELETE user (200 OK)
-DELETE {{apiUrl}}/users/3609
-
-### DELETE non-existing user (404 Not Found)
-DELETE {{apiUrl}}/users/99999
+// TODO: ADD!
