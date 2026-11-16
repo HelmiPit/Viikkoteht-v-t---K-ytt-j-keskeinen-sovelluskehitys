@@ -4,15 +4,19 @@ import {
   fetchAllMediaItems,
   findMediaItemById,
   modifyMediaItem,
-} from '../models/media-model-mockdata.js';
+} from '../models/media-model.js';
 
-const getMediaItems = (req, res) => {
-  const items = fetchAllMediaItems(req.query.limit);
+const getMediaItems = async (req, res) => {
+  const limit = Number(req.query.limit);
+  if (req.query.limit && isNaN(limit)) {
+    return res.status(400).json({error: 400, message: 'Parameteter not a number'});
+  }
+  const items = await fetchAllMediaItems(limit);
   res.json(items);
 };
 
-const getMediaItemById = (req, res) => {
-  const mediaItem = findMediaItemById(req.params.id);
+const getMediaItemById = async (req, res) => {
+  const mediaItem = await findMediaItemById(req.params.id);
   if (mediaItem) {
     res.json(mediaItem);
   } else {
@@ -20,29 +24,39 @@ const getMediaItemById = (req, res) => {
   }
 };
 
-const postMediaItem = (req, res) => {
-  // dummy validation example
-  if (!req.body.title) {
-    return res.status(400).json({error: 400, message: 'Something missing!'});
+const postMediaItem = async (req, res) => {
+  // Tarkistetaan myös, että tiedosto (req.file) ja user_id on mukana
+  if (!req.body.title || !req.body.user_id || !req.file) {
+    return res.status(400).json({error: 400, message: 'Title, user_id or file missing!'});
   }
-  addMediaItem({...req.body, ...req.file});
-  res.status(201).json({message: 'New media item added.'});
+  console.log('new media item (mediaController)', {...req.body, ...req.file});
+  const media_id = await addMediaItem({...req.body, ...req.file});
+  if (media_id.error) {
+    return res.status(500).json(media_id);
+  }
+  res.status(201).json({message: 'New media item added.', media_id});
 };
 
-const putMediaItem = (req, res) => {
-  const updatedItem = modifyMediaItem(req.params.id, req.body);
+const putMediaItem = async (req, res) => {
+  const updatedItem = await modifyMediaItem(req.params.id, req.body);
   if (!updatedItem) {
     return res.status(404).json({error: 404, message: 'Item not found!'});
   }
   res.json({message: 'Media updated!', updatedItem});
 };
 
-const deleteMediaItem = (req, res) => {
-  const success = deleteMediaItemById(req.params.id);
+const deleteMediaItem = async (req, res) => {
+  const success = await deleteMediaItemById(req.params.id);
   if (!success) {
     return res.status(404).json({error: 404, message: 'Item not found!'});
   }
   res.json({message: 'Media deleted!'});
-}
+};
 
-export {getMediaItems, getMediaItemById, postMediaItem, putMediaItem, deleteMediaItem};
+export {
+  getMediaItems,
+  getMediaItemById,
+  postMediaItem,
+  putMediaItem,
+  deleteMediaItem,
+};

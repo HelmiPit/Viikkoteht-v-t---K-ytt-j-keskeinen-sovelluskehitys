@@ -1,6 +1,7 @@
 import express from 'express';
 import mediaRouter from './routes/media-router.js';
 import userRouter from './routes/user-router.js';
+import likeRouter from './routes/like-router.js'; // LISÄTTY
 import {logRequest} from './middlewares/logger.js';
 
 const hostname = '127.0.0.1';
@@ -10,15 +11,10 @@ const port = 3000;
 app.set('view engine', 'pug');
 app.set('views', 'src/views');
 
-// Use custom logger middleware for every HTTP request
 app.use(logRequest);
-
 app.use(express.json());
-
-// Serve all static files from the public folder at the root URL
 app.use('/', express.static('public'));
 
-// API "docs" using pug template engine
 app.get('/api', (req, res) => {
   res.render('index', {
     title: 'Example REST api',
@@ -26,10 +22,9 @@ app.get('/api', (req, res) => {
   });
 });
 
-// All media resource routes (/api/media endpoints) are handled with media router
 app.use('/api/media', mediaRouter);
-// User resource endpoints
 app.use('/api/users', userRouter);
+app.use('/api/likes', likeRouter); // LISÄTTY
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
