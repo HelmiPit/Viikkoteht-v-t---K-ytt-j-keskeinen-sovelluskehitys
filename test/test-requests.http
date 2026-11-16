@@ -1,4 +1,4 @@
-# Test http requests for my api
+# Test http requests for Express API
 @apiUrl = http://localhost:3000/api
 
 ### Get server root
@@ -23,7 +23,7 @@ GET {{apiUrl}}/media/1
 ### GET media item by id (Not found)
 GET {{apiUrl}}/media/0
 
-### Add new media item WITH IMAGE (form-data)
+### Add new media item with image (form-data)
 POST {{apiUrl}}/media
 Content-Type: multipart/form-data; boundary=----Boundary
 

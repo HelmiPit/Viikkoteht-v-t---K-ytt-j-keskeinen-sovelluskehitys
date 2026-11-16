@@ -17,7 +17,7 @@ const getLikesByUserId = async (req, res) => {
 
 const postLike = async (req, res) => {
   if (!req.body.media_id || !req.body.user_id) {
-    return res.status(400).json({error: 400, message: 'media_id or user_id missing!'});
+    return res.status(400).json({error: 400, message: 'media_id or user_id missing.'});
   }
   const like_id = await addLike(req.body);
   if (like_id.error) {
@@ -29,9 +29,9 @@ const postLike = async (req, res) => {
 const deleteLike = async (req, res) => {
   const success = await deleteLikeById(req.params.id);
   if (!success) {
-    return res.status(404).json({error: 404, message: 'Like not found!'});
+    return res.status(404).json({error: 404, message: 'Like not found.'});
   }
-  res.json({message: 'Like deleted!'});
+  res.json({message: 'Like deleted.'});
 };
 
 export {

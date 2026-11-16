@@ -28,23 +28,23 @@ const postUser = async (req, res) => {
   if (user_id.error) {
     return res.status(500).json(user_id);
   }
-  res.status(201).json({message: 'New user added.', user_id});
+  res.status(201).json({message: 'New user added', user_id});
 };
 
 const putUser = async (req, res) => {
   const updatedUser = await modifyUser(req.params.id, req.body);
   if (!updatedUser) {
-    return res.status(404).json({error: 404, message: 'User not found.'});
+    return res.status(404).json({error: 404, message: 'User not found'});
   }
-  res.json({message: 'User updated!', updatedUser});
+  res.json({message: 'User updated', updatedUser});
 };
 
 const deleteUser = async (req, res) => {
   const success = await deleteUserById(req.params.id);
   if (!success) {
-    return res.status(404).json({error: 404, message: 'User not found.'});
+    return res.status(404).json({error: 404, message: 'User not found'});
   }
-  res.json({message: 'User deleted!'});
+  res.json({message: 'User deleted'});
 };
 
 export {

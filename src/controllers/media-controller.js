@@ -20,7 +20,7 @@ const getMediaItemById = async (req, res) => {
   if (mediaItem) {
     res.json(mediaItem);
   } else {
-    res.status(404).json({error: 404, message: 'Not found'});
+    res.status(404).json({error: 404, message: 'Not found.'});
   }
 };
 
@@ -40,17 +40,17 @@ const postMediaItem = async (req, res) => {
 const putMediaItem = async (req, res) => {
   const updatedItem = await modifyMediaItem(req.params.id, req.body);
   if (!updatedItem) {
-    return res.status(404).json({error: 404, message: 'Item not found!'});
+    return res.status(404).json({error: 404, message: 'Item not found.'});
   }
-  res.json({message: 'Media updated!', updatedItem});
+  res.json({message: 'Media updated.', updatedItem});
 };
 
 const deleteMediaItem = async (req, res) => {
   const success = await deleteMediaItemById(req.params.id);
   if (!success) {
-    return res.status(404).json({error: 404, message: 'Item not found!'});
+    return res.status(404).json({error: 404, message: 'Item not found.'});
   }
-  res.json({message: 'Media deleted!'});
+  res.json({message: 'Media deleted.'});
 };
 
 export {
