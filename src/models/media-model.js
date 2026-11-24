@@ -2,13 +2,18 @@ import promisePool from '../utils/database.js';
 
 const fetchAllMediaItems = async (limit) => {
   try {
+    // TODO: järjestä tulokset niin, että uusin on viimeisenä
     let result;
     if (limit) {
-      result = await promisePool.query('SELECT * FROM MediaItems LIMIT ' + limit);
+      result = await promisePool.query(
+        'SELECT * FROM MediaItems LIMIT ' + limit,
+      );
     } else {
       result = await promisePool.query('SELECT * FROM MediaItems');
     }
     const [rows] = result;
+    //console.log('whole result object', result);
+    //console.log('rows', rows);
     return rows;
   } catch (e) {
     console.error('error', e.message);
@@ -18,10 +23,13 @@ const fetchAllMediaItems = async (limit) => {
 
 const findMediaItemById = async (id) => {
   try {
+    // prepared statement suojaa sql-injektioilta
     const sql = 'SELECT * FROM MediaItems WHERE media_id = ?';
     const params = [id];
     const result = await promisePool.execute(sql, params);
     const [rows] = result;
+    //console.log('whole result object', result);
+    //console.log('rows', rows);
     return rows[0];
   } catch (e) {
     console.error('error', e.message);
@@ -39,6 +47,7 @@ const addMediaItem = async (media) => {
   const params = [user_id, filename, size, mimetype, title, description];
   try {
     const rows = await promisePool.execute(sql, params);
+    console.log('rows', rows);
     return rows[0].insertId;
   } catch (e) {
     console.error('error', e.message);
@@ -46,36 +55,52 @@ const addMediaItem = async (media) => {
   }
 };
 
-// Päivittää median otsikon ja kuvauksen tietokantaan
-const modifyMediaItem = async (id, modifiedItem) => {
+const modifyMediaItem = async (mediaId, modifiedItem, user) => {
   const {title, description} = modifiedItem;
-  const sql = 'UPDATE MediaItems SET title = ?, description = ? WHERE media_id = ?';
-  const params = [title, description, id];
+  let sql, params;
   try {
-    const [result] = await promisePool.execute(sql, params);
-    if (result.affectedRows === 0) {
-      return false;
+    if (user.user_level_id == 1) {
+      sql = 'UPDATE MediaItems SET title = ?, description = ? WHERE media_id = ?';
+      params = [title, description || '', mediaId];
+    } else {
+      sql = 'UPDATE MediaItems SET title = ?, description = ? WHERE media_id = ? AND user_id = ?';
+      params = [title, description || '', mediaId, user.user_id];
     }
-    return await findMediaItemById(id);
+    const [rows] = await promisePool.execute(sql, params);
+    return rows.affectedRows;
   } catch (e) {
     console.error('error', e.message);
-    return false;
+    return {error: e.message};
   }
 };
 
-// Poistaa median tietokannasta id:n perusteella
-const deleteMediaItemById = async (id) => {
-  const sql = 'DELETE FROM MediaItems WHERE media_id = ?';
-  const params = [id];
+/**
+- Deletes media item from mock data array
+ *
+- @param {number} id - id of the media item
+- @returns {boolean} - operation success
+ */
+const removeMediaItem = async (mediaId, user) => {
+  let sql, params;
   try {
-    const [result] = await promisePool.execute(sql, params);
-    if (result.affectedRows === 0) {
-      return false;
+    // prepared statement suojaa sql-injektioilta
+    if (user.user_level_id == 1) {
+      // admin-käyttäjä
+      sql = 'DELETE FROM MediaItems WHERE media_id = ?';
+      params = [mediaId];
+    } else {
+      // tavallinen käyttäjä, joka on tiedoston omistaja
+      sql = 'DELETE FROM MediaItems WHERE media_id = ? AND user_id = ?';
+      params = [mediaId, user.user_id];
     }
-    return true;
+    const result = await promisePool.execute(sql, params);
+    const [rows] = result;
+    //console.log('whole result object', result);
+    console.log('rows', rows);
+    return rows.affectedRows;
   } catch (e) {
     console.error('error', e.message);
-    return false;
+    return {error: e.message};
   }
 };
 
@@ -84,5 +109,5 @@ export {
   fetchAllMediaItems,
   findMediaItemById,
   modifyMediaItem,
-  deleteMediaItemById,
+  removeMediaItem,
 };

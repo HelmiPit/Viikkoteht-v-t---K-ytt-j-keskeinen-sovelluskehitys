@@ -1,11 +1,19 @@
-# Test http requests for Express API
+# Test http requests for my api
 @apiUrl = http://localhost:3000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6IkphbmVTbWl0aCIsImVtYWlsIjoiamFuZXNtaXRoQGV4YW1wbGUuY29tIiwidXNlcl9sZXZlbF9pZCI6MiwiY3JlYXRlZF9hdCI6IjIwMjYtMTEtMTBUMDk6MDI6NTAuMDAwWiIsImlhdCI6MTc5NDkwNTkwOSwiZXhwIjoxNzk0OTkyMzA5fQ.QWRodlr1yYAhFG_06E4BLiVs90ObrP0WlT3F6qemEAk
+
 
 ### Get server root
 GET http://localhost:3000/
 
 ### Get api root
 GET http://localhost:3000/api
+
+### Get not found 404
+GET http://localhost:3000/something-not-found
+
+### Post server root
+POST http://localhost:3000/
 
 ##################
 ## /media requests
@@ -14,49 +22,110 @@ GET http://localhost:3000/api
 ### GET all media items
 GET {{apiUrl}}/media
 
-### GET 2 media items
-GET {{apiUrl}}/media?limit=2
+### GET 3 latest media items
+GET {{apiUrl}}/media?limit=1
 
 ### GET media item by id
-GET {{apiUrl}}/media/1
+GET {{apiUrl}}/media/2
 
 ### GET media item by id (Not found)
 GET {{apiUrl}}/media/0
 
-### Add new media item with image (form-data)
+### Add new media item (JSON, no file included!)
 POST {{apiUrl}}/media
+content-type: application/json
+
+{
+  "filename": "60ac.jpg",
+  "title": "New image",
+  "description": "The description of the new image",
+  "user_id": 305,
+  "media_type": "image/jpeg"
+}
+
+### Add new media item WITH IMAGE (form-data) with token
+POST {{apiUrl}}/media
+Authorization: Bearer {{login.response.body.token}}
 Content-Type: multipart/form-data; boundary=----Boundary
 
 ------Boundary
 Content-Disposition: form-data; name="title"
 
-New cat image
-------Boundary
-Content-Disposition: form-data; name="description"
-
-Cute bunny picture
+New bunny image
 ------Boundary
 Content-Disposition: form-data; name="user_id"
 
 1
 ------Boundary
-Content-Disposition: form-data; name="file"; filename="bunny.png"
-Content-Type: image/png
+Content-Disposition: form-data; name="file"; filename="image.png"
+Content-Type: image/jpeg
 
 < ./bunny.png
 ------Boundary--
 
-### Modify existing media item 
-PUT {{apiUrl}}/media/1
+
+### Add new media item (Bad request, title missing)
+POST {{apiUrl}}/media
 content-type: application/json
 
 {
-  "description": "Updated description",
-  "title": "Updated title"
+  "filename": "60ac.jpg",
+  "description": "The description of the new image",
+  "user_id": 305,
+  "media_type": "image/jpeg"
 }
 
-### Delete media item 
-DELETE {{apiUrl}}/media/4
+### Modify existing media item (not found / unauthorized)
+PUT {{apiUrl}}/media/9632
+Authorization: Bearer {{login.response.body.token}}
+content-type: application/json
+
+{
+  "description": "updated desc",
+  "title": "Uus title"
+}
+
+### Modify own media item (user_id = 2)
+PUT {{apiUrl}}/media/2
+Authorization: Bearer {{login.response.body.token}}
+content-type: application/json
+
+{
+  "description": "updated desc",
+  "title": "Uus title"
+}
+
+### Modify another user's media item as regular user (unauthorized)
+PUT {{apiUrl}}/media/1
+Authorization: Bearer {{login.response.body.token}}
+content-type: application/json
+
+{
+  "description": "updated desc",
+  "title": "Uus title"
+}
+
+### Modify any media item as admin
+PUT {{apiUrl}}/media/2
+Authorization: Bearer {{loginAdmin.response.body.token}}
+content-type: application/json
+
+{
+  "description": "admin updated desc",
+  "title": "Admin title"
+}
+
+### Delete media item (not found / unauthorized)
+DELETE {{apiUrl}}/media/13
+Authorization: Bearer {{login.response.body.token}}
+
+### Delete own media item
+DELETE {{apiUrl}}/media/2
+Authorization: Bearer {{login.response.body.token}}
+
+### Delete any media item as admin
+DELETE {{apiUrl}}/media/1
+Authorization: Bearer {{loginAdmin.response.body.token}}
 
 ##################
 ## /users requests
@@ -64,52 +133,83 @@ DELETE {{apiUrl}}/media/4
 
 ### GET all users
 GET {{apiUrl}}/users
+Authorization: Bearer {{login.response.body.token}}
 
 ### GET user by id
-GET {{apiUrl}}/users/1
+GET {{apiUrl}}/users/2
+Authorization: Bearer {{login.response.body.token}}
 
 ### Add new user
 POST {{apiUrl}}/users
 content-type: application/json
 
 {
-  "username": "TestUser",
+  "username": "NewUser",
   "password": "password123",
-  "email": "testuser@example.com",
-  "user_level_id": 2
+  "email": "newuser@example.com"
 }
 
-### Modify existing user
+### Modify own user info (user_id = 2)
+PUT {{apiUrl}}/users/2
+Authorization: Bearer {{login.response.body.token}}
+content-type: application/json
+
+{
+  "username": "JaneSmith",
+  "email": "janesmith@example.com",
+  "password": "to-be-hashed-pw2"
+}
+
+### Modify another user info as regular user (forbidden)
 PUT {{apiUrl}}/users/1
+Authorization: Bearer {{login.response.body.token}}
 content-type: application/json
 
 {
-  "username": "JohnDoeUpdated",
-  "password": "newpassword123",
-  "email": "johndoe.new@example.com"
+  "username": "HackedAdmin",
+  "email": "hack@example.com",
+  "password": "123"
 }
 
-### Delete user (poistaa äsken luodun käyttäjän, esim. ID 5)
-DELETE {{apiUrl}}/users/5
-
-##################
-## /likes requests
-##################
-
-### GET likes for media item 1
-GET {{apiUrl}}/likes/media/1
-
-### GET likes by user 2
-GET {{apiUrl}}/likes/user/2
-
-### Add new like
-POST {{apiUrl}}/likes
+### Modify any user info as admin
+PUT {{apiUrl}}/users/2
+Authorization: Bearer {{loginAdmin.response.body.token}}
 content-type: application/json
 
 {
-  "media_id": 1,
-  "user_id": 1
+  "username": "JaneSmith",
+  "email": "janesmith@example.com",
+  "password": "to-be-hashed-pw2"
 }
 
-### Delete like
-DELETE {{apiUrl}}/likes/1
+### Delete user as admin
+DELETE {{apiUrl}}/users/3
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+##################
+## Authentication routes
+##################
+
+### Post login (regular user)
+# @name login
+POST {{apiUrl}}/auth/login
+content-type: application/json
+
+{
+  "username": "JaneSmith",
+  "password": "to-be-hashed-pw2"
+}
+
+### Post login (admin user)
+# @name loginAdmin
+POST {{apiUrl}}/auth/login
+content-type: application/json
+
+{
+  "username": "AdminUser",
+  "password": "to-be-hashed-pw4"
+}
+
+### Get user info
+GET {{apiUrl}}/auth/me
+Authorization: Bearer {{login.response.body.token}}

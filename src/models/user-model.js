@@ -1,8 +1,9 @@
 import promisePool from '../utils/database.js';
 
-const fetchAllUsers = async () => {
+const selectAllUsers = async () => {
   try {
-    const [rows] = await promisePool.query('SELECT * FROM Users');
+    const sql = 'SELECT user_id, username, email, user_level_id, created_at FROM Users';
+    const [rows] = await promisePool.execute(sql);
     return rows;
   } catch (e) {
     console.error('error', e.message);
@@ -10,10 +11,26 @@ const fetchAllUsers = async () => {
   }
 };
 
-const findUserById = async (id) => {
+const selectUserById = async (id) => {
   try {
-    const sql = 'SELECT * FROM Users WHERE user_id = ?';
+    const sql = 'SELECT user_id, username, email, user_level_id, created_at FROM Users WHERE user_id = ?';
     const [rows] = await promisePool.execute(sql, [id]);
+    return rows[0];
+  } catch (e) {
+    console.error('error', e.message);
+    return {error: e.message};
+  }
+};
+
+const selectUserByUsername = async (username) => {
+  try {
+    // prepared statement suojaa sql-injektioilta
+    const sql = 'SELECT * FROM Users WHERE username = ?';
+    const params = [username];
+    const result = await promisePool.execute(sql, params);
+    const [rows] = result;
+    //console.log('whole result object', result);
+    //console.log('rows', rows);
     return rows[0];
   } catch (e) {
     console.error('error', e.message);
@@ -23,11 +40,9 @@ const findUserById = async (id) => {
 
 const addUser = async (user) => {
   const {username, password, email, user_level_id} = user;
-  // Jos user_level_id ei anneta, oletuksena 2 (User)
-  const level = user_level_id || 2;
   const sql = `INSERT INTO Users (username, password, email, user_level_id)
                VALUES (?, ?, ?, ?)`;
-  const params = [username, password, email, level];
+  const params = [username, password, email, user_level_id];
   try {
     const [rows] = await promisePool.execute(sql, params);
     return rows.insertId;
@@ -37,40 +52,48 @@ const addUser = async (user) => {
   }
 };
 
-const modifyUser = async (id, modifiedUser) => {
-  const {username, password, email} = modifiedUser;
-  const sql = 'UPDATE Users SET username = ?, password = ?, email = ? WHERE user_id = ?';
-  const params = [username, password, email, id];
+const modifyUser = async (targetUserId, modifiedUser, currentUser) => {
+  const {username, email, password} = modifiedUser;
+  let sql, params;
   try {
-    const [result] = await promisePool.execute(sql, params);
-    if (result.affectedRows === 0) {
-      return false;
+    if (currentUser.user_level_id == 1) {
+      sql = 'UPDATE Users SET username = ?, email = ?, password = ? WHERE user_id = ?';
+      params = [username, email, password, targetUserId];
+    } else {
+      sql = 'UPDATE Users SET username = ?, email = ?, password = ? WHERE user_id = ? AND user_id = ?';
+      params = [username, email, password, targetUserId, currentUser.user_id];
     }
-    return await findUserById(id);
+    const [rows] = await promisePool.execute(sql, params);
+    return rows.affectedRows;
   } catch (e) {
     console.error('error', e.message);
-    return false;
+    return {error: e.message};
   }
 };
 
-const deleteUserById = async (id) => {
-  const sql = 'DELETE FROM Users WHERE user_id = ?';
+const removeUser = async (targetUserId, currentUser) => {
+  let sql, params;
   try {
-    const [result] = await promisePool.execute(sql, [id]);
-    if (result.affectedRows === 0) {
-      return false;
+    if (currentUser.user_level_id == 1) {
+      sql = 'DELETE FROM Users WHERE user_id = ?';
+      params = [targetUserId];
+    } else {
+      sql = 'DELETE FROM Users WHERE user_id = ? AND user_id = ?';
+      params = [targetUserId, currentUser.user_id];
     }
-    return true;
+    const [rows] = await promisePool.execute(sql, params);
+    return rows.affectedRows;
   } catch (e) {
     console.error('error', e.message);
-    return false;
+    return {error: e.message};
   }
 };
 
 export {
-  fetchAllUsers,
-  findUserById,
+  selectAllUsers,
+  selectUserById,
+  selectUserByUsername,
   addUser,
   modifyUser,
-  deleteUserById,
+  removeUser,
 };

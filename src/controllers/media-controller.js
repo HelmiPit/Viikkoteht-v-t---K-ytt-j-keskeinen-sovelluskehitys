@@ -1,9 +1,9 @@
 import {
   addMediaItem,
-  deleteMediaItemById,
   fetchAllMediaItems,
   findMediaItemById,
   modifyMediaItem,
+  removeMediaItem,
 } from '../models/media-model.js';
 
 const getMediaItems = async (req, res) => {
@@ -20,34 +20,36 @@ const getMediaItemById = async (req, res) => {
   if (mediaItem) {
     res.json(mediaItem);
   } else {
-    res.status(404).json({error: 404, message: 'Not found.'});
+    res.status(404).json({error: 404, message: 'Not found'});
   }
 };
 
 const postMediaItem = async (req, res) => {
-  // Tarkistetaan myös, että tiedosto (req.file) ja user_id on mukana
-  if (!req.body.title || !req.body.user_id || !req.file) {
-    return res.status(400).json({error: 400, message: 'Title, user_id or file missing!'});
+  // dummy validation example
+  if (!req.body.title) {
+    return res.status(400).json({error: 400, message: 'Something missing!'});
   }
+  // pikapurkka, TODO: fix
+  req.body.user_id = req.user.user_id;
   console.log('new media item (mediaController)', {...req.body, ...req.file});
   const media_id = await addMediaItem({...req.body, ...req.file});
-  if (media_id.error) {
-    return res.status(500).json(media_id);
-  }
   res.status(201).json({message: 'New media item added.', media_id});
 };
 
 const putMediaItem = async (req, res) => {
-  const updatedItem = await modifyMediaItem(req.params.id, req.body);
-  if (!updatedItem) {
+  if (!req.body.title) {
+    return res.status(400).json({error: 400, message: 'Title is required.'});
+  }
+  const affectedRows = await modifyMediaItem(req.params.id, req.body, req.user);
+  if (!affectedRows || affectedRows < 1) {
     return res.status(404).json({error: 404, message: 'Item not found.'});
   }
-  res.json({message: 'Media updated.', updatedItem});
+  res.json({message: 'Media updated.'});
 };
 
 const deleteMediaItem = async (req, res) => {
-  const success = await deleteMediaItemById(req.params.id);
-  if (!success) {
+  const affectedRows = await removeMediaItem(req.params.id, req.user);
+  if (affectedRows < 1) {
     return res.status(404).json({error: 404, message: 'Item not found.'});
   }
   res.json({message: 'Media deleted.'});
