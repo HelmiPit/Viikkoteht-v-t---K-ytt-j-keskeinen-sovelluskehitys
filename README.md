@@ -1,123 +1,127 @@
-# Tehtävä 5A - User authentication
+# Tehtävä 5B - Input validation and error handling
 
-Tämän sovelluksen tarkoitus on toimia medianjakopalvelun palvelimena. Tässä sovellukseen on lisätty käyttäjien tunnistautuminen (authentication) JWT-tokeneilla sekä käyttöoikeuksien hallinta (authorization) MVC-mallin mukaisesti.
+Tämän sovelluksen tarkoitus on toimia medianjakopalvelun palvelimena. Sovellukseen lisätty virheenkäsittely ('notFoundHandler' ja 'errorHandler') sekä palvelinpuolen syötteiden validointi express-validator-kirjaston avulla MVC-mallin mukaisesti.
 
 ## Mitkä osiot sait tehtyä
 
-Sain tehtyä kaikki osiot 1-4.
+Sain tehtyä kaikki osiot 1-3.
 
 ## Mahdolliset ongelmat
 
-Aluksi admin-käyttäjällä kirjautuminen palautti '401 Unauthorized', koska test-requests.http-tiedostossa oli väärä käyttäjätunnus suhteessa MediaSharingApp-tietokannan testidataan, ja 'jsonwebtoken'-kirjasto piti asentaa erikseen.
+404-virheet palautuivat aluksi Expressin oletus HTML-sivuna ennen kuin 'notFoundHandler' ja 'errorHandler' lisättiin src/index.js-tiedoston loppuun.
 
 ## Kuvakaappaukset sovelluksen toiminnasta
 
-## Authentication routes
+## Error handling & 404 routes
 
-### 1. Post login (regular user)
-
-HTTP request:
-
-![Post login (regular user)](screenshots/post-login-regular-user1.png)
-
-Response:
-
-![Post login (regular user)](screenshots/post-login-regular-user2.png)
-
-### 2. Post login (admin user)
+### 1. Get not found 404
 
 HTTP request:
 
-![Post login (admin user)](screenshots/post-login-admin-user1.png)
+![Get not found 404](screenshots/404-not-found1.png)
 
 Response:
 
-![Post login (admin user)](screenshots/post-login-admin-user2.png)
+![Get not found 404](screenshots/404-not-found2.png)
+
+### 2. Get media item by id (Not found)
+
+HTTP request:
+
+![Get media item by id (Not found)](screenshots/get-media-item-by-id-not-found1.png)
+
+Response:
+
+![Get media item by id (Not found)](screenshots/get-media-item-by-id-not-found2.png)
 
 ---
 
-## /media requests
+## Authentication routes
 
-### 3. Add new media item (JSON, no file included)
-
-HTTP request:
-
-![Add new media item](screenshots/add-new-media-item1.png)
-
-Response:
-
-![Add new media item](screenshots/add-new-media-item2.png)
-
-### 4. Modify own media item (user_id = 2)
+### 3. Post login
 
 HTTP request:
 
-![Modify own media item](screenshots/modify-own-media-item1.png)
+![Post login](screenshots/post-login1.png)
 
 Response:
 
-![Modify own media item](screenshots/modify-own-media-item2.png)
+![Post login](screenshots/post-login2.png)
 
-### 5. Modify another user's media item as regular user (unauthorized)
+### 4. Post login (validation error: missing password)
 
 HTTP request:
 
-![Modify another user's media item](screenshots/modify-another-user-info1.png)
+![Post login (validation error)](screenshots/post-login-validation-error1.png)
 
 Response:
 
-![Modify another user's media item](screenshots/modify-another-user-info2.png)
-
-### 6. Delete own media item
-
-HTTP request:
-
-![Delete own media item](screenshots/delete-own-media-item1.png)
-
-Response:
-
-![Delete own media item](screenshots/delete-own-media-item2.png)
-
-### 7. Delete any media item as admin
-
-HTTP request:
-
-![Delete any media item as admin](screenshots/delete-any-media-item-as-admin1.png)
-
-Response:
-
-![Delete any media item as admin](screenshots/delete-any-media-item-as-admin2.png)
+![Post login (validation error)](screenshots/post-login-validation-error2.png)
 
 ---
 
 ## /users requests
 
-### 8. Modify own user info (user_id = 2)
+### 5. Register new user
 
 HTTP request:
 
-![Modify own user info](screenshots/modify-own-user-info1.png)
+![Register new user](screenshots/register-new-user1.png)
 
 Response:
 
-![Modify own user info](screenshots/modify-own-user-info2.png)
+![Register new user](screenshots/register-new-user2.png)
 
-### 9. Modify another user info as regular user (forbidden)
+### 6. Register new user (validation error: invalid email & short password)
 
 HTTP request:
 
-![Modify another user info as regular user](screenshots/modify-another-user-info-as-regular-user1.png)
+![Register new user (validation error)](screenshots/register-new-user-validation-error1.png)
 
 Response:
 
-![Modify another user info as regular user](screenshots/modify-another-user-info-as-regular-user2.png)
+![Register new user (validation error)](screenshots/register-new-user-validation-error2.png)
 
-### 10. Modify any user info as admin
+---
+
+## /media requests
+
+### 7. Get 3 latest media items (validation error)
 
 HTTP request:
 
-![Modify any user info as admin](screenshots/modify-any-user-info-as-admin1.png)
+![Get 3 latest media items (validation error)](screenshots/get-3-latest-media-items-validation-error1.png)
 
 Response:
 
-![Modify any user info as admin](screenshots/modify-any-user-info-as-admin2.png)
+![Get 3 latest media items (validation error)](screenshots/get-3-latest-media-items-validation-error2.png)
+
+### 8. Get media item by id (validation error)
+
+HTTP request:
+
+![Get media item by id (validation error)](screenshots/get-media-item-by-id-validation-error1.png)
+
+Response:
+
+![Get media item by id (validation error)](screenshots/get-media-item-by-id-validation-error2.png)
+
+### 9. Add new media item with image (with token)
+
+HTTP request:
+
+![Add new media item with image](screenshots/add-new-media-item-with-image-with-token1.png)
+
+Response:
+
+![Add new media item with image](screenshots/add-new-media-item-with-image-with-token2.png)
+
+### 10. Add new media item (validation error: title too short)
+
+HTTP request:
+
+![Add new media item (validation error)](screenshots/add-new-media-item-validation-error-title-too-short1.png)
+
+Response:
+
+![Add new media item (validation error)](screenshots/add-new-media-item-validation-error-title-too-short2.png)

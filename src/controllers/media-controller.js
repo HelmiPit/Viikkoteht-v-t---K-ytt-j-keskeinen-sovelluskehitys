@@ -6,53 +6,75 @@ import {
   removeMediaItem,
 } from '../models/media-model.js';
 
-const getMediaItems = async (req, res) => {
-  const limit = Number(req.query.limit);
-  if (req.query.limit && isNaN(limit)) {
-    return res.status(400).json({error: 400, message: 'Parameteter not a number'});
-  }
+const getMediaItems = async (req, res, next) => {
+  const limit = req.query.limit ? Number(req.query.limit) : undefined;
   const items = await fetchAllMediaItems(limit);
+  if (items.error) {
+    const error = new Error(items.error);
+    error.status = 500;
+    return next(error);
+  }
   res.json(items);
 };
 
-const getMediaItemById = async (req, res) => {
+const getMediaItemById = async (req, res, next) => {
   const mediaItem = await findMediaItemById(req.params.id);
   if (mediaItem) {
+    if (mediaItem.error) {
+      const error = new Error(mediaItem.error);
+      error.status = 500;
+      return next(error);
+    }
     res.json(mediaItem);
   } else {
-    res.status(404).json({error: 404, message: 'Not found'});
+    const error = new Error('Not found');
+    error.status = 404;
+    next(error);
   }
 };
 
-const postMediaItem = async (req, res) => {
-  // dummy validation example
-  if (!req.body.title) {
-    return res.status(400).json({error: 400, message: 'Something missing!'});
+const postMediaItem = async (req, res, next) => {
+  if (!req.file) {
+    const error = new Error('File is required');
+    error.status = 400;
+    return next(error);
   }
   // pikapurkka, TODO: fix
   req.body.user_id = req.user.user_id;
   console.log('new media item (mediaController)', {...req.body, ...req.file});
   const media_id = await addMediaItem({...req.body, ...req.file});
+  if (media_id.error) {
+    const error = new Error(media_id.error);
+    error.status = 500;
+    return next(error);
+  }
   res.status(201).json({message: 'New media item added.', media_id});
 };
 
-const putMediaItem = async (req, res) => {
-  if (!req.body.title) {
-    return res.status(400).json({error: 400, message: 'Title is required.'});
+const putMediaItem = async (req, res, next) => {
+  const updatedItem = await modifyMediaItem(req.params.id, req.body);
+  // TODO: implement MODEL
+  if (!updatedItem) {
+    const error = new Error('Item not found!');
+    error.status = 404;
+    return next(error);
   }
-  const affectedRows = await modifyMediaItem(req.params.id, req.body, req.user);
-  if (!affectedRows || affectedRows < 1) {
-    return res.status(404).json({error: 404, message: 'Item not found.'});
-  }
-  res.json({message: 'Media updated.'});
+  res.json({message: 'Media updated!', updatedItem});
 };
 
-const deleteMediaItem = async (req, res) => {
+const deleteMediaItem = async (req, res, next) => {
   const affectedRows = await removeMediaItem(req.params.id, req.user);
-  if (affectedRows < 1) {
-    return res.status(404).json({error: 404, message: 'Item not found.'});
+  if (affectedRows && affectedRows.error) {
+    const error = new Error(affectedRows.error);
+    error.status = 500;
+    return next(error);
   }
-  res.json({message: 'Media deleted.'});
+  if (affectedRows < 1) {
+    const error = new Error('Item not found!');
+    error.status = 404;
+    return next(error);
+  }
+  res.json({message: 'Media deleted!'});
 };
 
 export {

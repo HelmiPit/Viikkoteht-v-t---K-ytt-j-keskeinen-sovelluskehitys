@@ -1,22 +1,32 @@
 import express from 'express';
-import {
-  deleteUser,
-  getUserById,
-  getUsers,
-  postUser,
-  putUser,
-} from '../controllers/user-controller.js';
-import {authenticateToken} from '../middlewares/authentication.js';
+import {postUser} from '../controllers/user-controller.js';
+import {body} from 'express-validator';
+import {validationErrors} from '../middlewares/error-handlers.js';
 
 const userRouter = express.Router();
 
-userRouter.route('/')
-  .get(authenticateToken, getUsers)
-  .post(postUser);
-
-userRouter.route('/:id')
-  .get(authenticateToken, getUserById)
-  .put(authenticateToken, putUser)
-  .delete(authenticateToken, deleteUser);
+userRouter
+  .route('/')
+  .post(
+    body('username')
+      .trim()
+      .isLength({min: 3, max: 16})
+      .isAlphanumeric()
+      .withMessage('must be 3-16 alphanumeric chars long'),
+    body('password').trim().isLength({min: 5}),
+    body('email')
+      .trim()
+      .normalizeEmail()
+      .isEmail()
+      .withMessage('Must be valid email address.')
+      .custom((content) => {
+        // console.log('email value for custom validator', content)
+        // palautusarvo true hyväksyy, false lisää validointivirheen
+        return true;
+      })
+      .withMessage('custom validation failed'),
+    validationErrors,
+    postUser,
+  );
 
 export default userRouter;

@@ -23,27 +23,22 @@ POST http://localhost:3000/
 GET {{apiUrl}}/media
 
 ### GET 3 latest media items
-GET {{apiUrl}}/media?limit=1
+GET {{apiUrl}}/media?limit=3
+
+### GET 3 latest media items (validation error)
+GET {{apiUrl}}/media?limit=abc
 
 ### GET media item by id
 GET {{apiUrl}}/media/2
 
+### GET media item by id (validation error)
+GET {{apiUrl}}/media/abc
+
 ### GET media item by id (Not found)
-GET {{apiUrl}}/media/0
+GET {{apiUrl}}/media/9999
 
-### Add new media item (JSON, no file included!)
-POST {{apiUrl}}/media
-content-type: application/json
 
-{
-  "filename": "60ac.jpg",
-  "title": "New image",
-  "description": "The description of the new image",
-  "user_id": 305,
-  "media_type": "image/jpeg"
-}
-
-### Add new media item WITH IMAGE (form-data) with token
+### Add new media item with image (form-data) with token
 POST {{apiUrl}}/media
 Authorization: Bearer {{login.response.body.token}}
 Content-Type: multipart/form-data; boundary=----Boundary
@@ -51,11 +46,27 @@ Content-Type: multipart/form-data; boundary=----Boundary
 ------Boundary
 Content-Disposition: form-data; name="title"
 
-New bunny image
+bunny
 ------Boundary
-Content-Disposition: form-data; name="user_id"
+Content-Disposition: form-data; name="description"
 
-1
+Picture of bunny
+------Boundary
+Content-Disposition: form-data; name="file"; filename="image.png"
+Content-Type: image/jpeg
+
+< ./bunny.png
+------Boundary--
+
+### Add new media item (validation error: title too short)
+POST {{apiUrl}}/media
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="title"
+
+a
 ------Boundary
 Content-Disposition: form-data; name="file"; filename="image.png"
 Content-Type: image/jpeg
@@ -64,18 +75,7 @@ Content-Type: image/jpeg
 ------Boundary--
 
 
-### Add new media item (Bad request, title missing)
-POST {{apiUrl}}/media
-content-type: application/json
-
-{
-  "filename": "60ac.jpg",
-  "description": "The description of the new image",
-  "user_id": 305,
-  "media_type": "image/jpeg"
-}
-
-### Modify existing media item (not found / unauthorized)
+### Modify existing media item 
 PUT {{apiUrl}}/media/9632
 Authorization: Bearer {{login.response.body.token}}
 content-type: application/json
@@ -85,112 +85,35 @@ content-type: application/json
   "title": "Uus title"
 }
 
-### Modify own media item (user_id = 2)
-PUT {{apiUrl}}/media/2
-Authorization: Bearer {{login.response.body.token}}
-content-type: application/json
-
-{
-  "description": "updated desc",
-  "title": "Uus title"
-}
-
-### Modify another user's media item as regular user (unauthorized)
-PUT {{apiUrl}}/media/1
-Authorization: Bearer {{login.response.body.token}}
-content-type: application/json
-
-{
-  "description": "updated desc",
-  "title": "Uus title"
-}
-
-### Modify any media item as admin
-PUT {{apiUrl}}/media/2
-Authorization: Bearer {{loginAdmin.response.body.token}}
-content-type: application/json
-
-{
-  "description": "admin updated desc",
-  "title": "Admin title"
-}
-
-### Delete media item (not found / unauthorized)
+### Delete media item 
 DELETE {{apiUrl}}/media/13
 Authorization: Bearer {{login.response.body.token}}
 
-### Delete own media item
-DELETE {{apiUrl}}/media/2
-Authorization: Bearer {{login.response.body.token}}
-
-### Delete any media item as admin
-DELETE {{apiUrl}}/media/1
-Authorization: Bearer {{loginAdmin.response.body.token}}
-
-##################
 ## /users requests
-##################
 
-### GET all users
-GET {{apiUrl}}/users
-Authorization: Bearer {{login.response.body.token}}
-
-### GET user by id
-GET {{apiUrl}}/users/2
-Authorization: Bearer {{login.response.body.token}}
-
-### Add new user
+### Register new user
 POST {{apiUrl}}/users
 content-type: application/json
 
 {
-  "username": "NewUser",
-  "password": "password123",
-  "email": "newuser@example.com"
+  "username": "TestUser123",
+  "password": "saladsakal",
+  "email": "aa@x.xi"
 }
 
-### Modify own user info (user_id = 2)
-PUT {{apiUrl}}/users/2
-Authorization: Bearer {{login.response.body.token}}
+### Register new user (validation error: invalid email & short password)
+POST {{apiUrl}}/users
 content-type: application/json
 
 {
-  "username": "JaneSmith",
-  "email": "janesmith@example.com",
-  "password": "to-be-hashed-pw2"
+  "username": "ab",
+  "password": "123",
+  "email": "not-an-email"
 }
 
-### Modify another user info as regular user (forbidden)
-PUT {{apiUrl}}/users/1
-Authorization: Bearer {{login.response.body.token}}
-content-type: application/json
-
-{
-  "username": "HackedAdmin",
-  "email": "hack@example.com",
-  "password": "123"
-}
-
-### Modify any user info as admin
-PUT {{apiUrl}}/users/2
-Authorization: Bearer {{loginAdmin.response.body.token}}
-content-type: application/json
-
-{
-  "username": "JaneSmith",
-  "email": "janesmith@example.com",
-  "password": "to-be-hashed-pw2"
-}
-
-### Delete user as admin
-DELETE {{apiUrl}}/users/3
-Authorization: Bearer {{loginAdmin.response.body.token}}
-
-##################
 ## Authentication routes
-##################
 
-### Post login (regular user)
+### Post login
 # @name login
 POST {{apiUrl}}/auth/login
 content-type: application/json
@@ -200,14 +123,13 @@ content-type: application/json
   "password": "to-be-hashed-pw2"
 }
 
-### Post login (admin user)
-# @name loginAdmin
+### Post login (validation error: missing password)
 POST {{apiUrl}}/auth/login
 content-type: application/json
 
 {
-  "username": "AdminUser",
-  "password": "to-be-hashed-pw4"
+  "username": "JaneSmith",
+  "password": ""
 }
 
 ### Get user info
